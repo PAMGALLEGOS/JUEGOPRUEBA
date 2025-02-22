@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego: ¡Atrapa el Carro!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
+    <h1 class="text-3xl font-bold text-center mb-4">¡Atrapa el Carro!</h1>
+    <section class="mb-4">
+      <p class="text-gray-700 font-semibold">Instrucciones:</p>
+      <ul class="list-disc list-inside text-gray-700">
+        <li>Haz clic en el carro rojo que aparece en el canvas.</li>
+        <li>Cada acierto suma 1 punto y el carro se reposiciona aleatoriamente.</li>
+        <li>Tienes 20 segundos para acumular la mayor cantidad de puntos.</li>
+        <li>Al finalizar el tiempo, se mostrará tu puntaje final.</li>
+        <li>Para reiniciar el juego, haz clic en el botón "Reiniciar Juego".</li>
+      </ul>
+    </section>
+    <div class="flex justify-between mb-4">
+      <span id="score" class="text-xl font-semibold">Puntaje: 0</span>
+      <span id="time" class="text-xl font-semibold">Tiempo: 20s</span>
+    </div>
+    <canvas id="gameCanvas" class="border border-gray-300 rounded-md mx-auto" width="400" height="300"></canvas>
+    <div class="mt-4 text-center">
+      <button id="restartBtn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none">
+        Reiniciar Juego
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+    const restartBtn = document.getElementById('restartBtn');
+    
+    let score = 0;
+    let timeLeft = 20;
+    let timerInterval;
+    
+    const car = {
+      x: 0,
+      y: 0,
+      width: 40,
+      height: 20
+    };
+    
+    function drawCar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(car.x, car.y, car.width, car.height);
+    }
+    
+    function randomizeCar() {
+      car.x = Math.random() * (canvas.width - car.width);
+      car.y = Math.random() * (canvas.height - car.height);
+      drawCar();
+    }
+    
+    function startGame() {
+      score = 0;
+      timeLeft = 20;
+      scoreDisplay.textContent = 'Puntaje: ' + score;
+      timeDisplay.textContent = 'Tiempo: ' + timeLeft + 's';
+      randomizeCar();
+      clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = 'Tiempo: ' + timeLeft + 's';
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          alert('¡Fin del juego! Tu puntaje es: ' + score + '.');
+        }
+      }, 750);
+    }
+    
+    canvas.addEventListener('click', function(event) {
+      if (timeLeft <= 0) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const xClick = event.clientX - rect.left;
+      const yClick = event.clientY - rect.top;
+      
+      if (xClick >= car.x && xClick <= car.x + car.width &&
+          yClick >= car.y && yClick <= car.y + car.height) {
+        score++;
+        scoreDisplay.textContent = 'Puntaje: ' + score;
+        randomizeCar();
+      }
+    });
+    
+    restartBtn.addEventListener('click', startGame);
+    
+    startGame();
+  </script>
+</body>
+</html>
